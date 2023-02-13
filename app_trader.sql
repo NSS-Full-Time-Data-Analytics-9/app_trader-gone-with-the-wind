@@ -112,7 +112,7 @@ LIMIT 10;
 								
 	
 	
---Top 4 Develop a Top 4 list of the apps that App Trader.
+-- Top 4 list of the apps for valentine day.
 
 SELECT p.name AS name_playstore, a.name AS name_appstore, a.primary_genre, p .genres, a.review_count, p.install_count,
 	cast(round((p.rating+a.rating)*2,0)/4 as decimal(3,2)) as avg_rating,
