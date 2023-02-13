@@ -8,25 +8,52 @@
 -- 	a. Develop some general recommendations about the price range, genre, content rating, or any other app characteristics that the company should target.
 -- price range
 -- 	b. Develop a Top 10 List of the apps that App Trader should buy based on profitability/return on investment as the sole priority.
-	SELECT p.name, a.name, a.primary_genre, p .genres, a.review_count, p.install_count, a.content_rating, p.content_rating,
+	SELECT p.name, a.name, a.primary_genre, p .genres, a.review_count, p.install_count
 	cast(round((p.rating+a.rating)*2,0)/4 as decimal(3,2)) as avg_rating, 
 	ROUND((a.price + p.price::money::numeric)/2, 2) as avg_price
-	 
 	FROM app_store_apps as a
 	INNER JOIN play_store_apps as p
 	USING(name)
 	WHERE cast(round((p.rating+a.rating)*2,0)/4 as decimal(3,2)) > 4
 	AND ROUND((a.price + p.price::money::numeric)/2, 2) <= 2.50
-	AND (a.review_count::numeric > 2000 or p.review_count::numeric > 2000)
-	GROUP BY p.name, a.name, p.genres, a.primary_genre, p.rating, a.rating, p.price, a.price,a.review_count, p.install_count, a.content_rating, p.content_rating
+	AND (a.review_count::numeric > 5000 or p.review_count::numeric > 5000)
+	GROUP BY p.name, a.name, p.genres, a.primary_genre, p.rating, a.rating, p.price, a.price,a.review_count, p.install_count
 	ORDER BY cast(round((p.rating+a.rating)*2,0)/4 as decimal(3,2)) desc
 	limit 10
 	
+	SELECT  p.name,  a.name, a.primary_genre, p.genres,  p.install_count, a.review_count,
+	cast(round((p.rating+a.rating)*2,0)/4 as decimal(3,2)) as avg_rating,
+	ROUND((a.price + p.price::money::numeric)/2, 2) as avg_price
+	FROM app_store_apps as a
+	INNER JOIN play_store_apps as p
+	USING(name)
+	WHERE cast(round((p.rating+a.rating)*2,0)/4 as decimal(3,2)) > 4
+	AND ROUND((a.price + p.price::money::numeric)/2, 2) <= 2.50
+	AND (a.review_count::numeric > 5000 or p.review_count > 5000)
+	GROUP BY p.name, a.name, p.genres, a.primary_genre, p.rating, a.rating, p.price, a.price, p.install_count, a.review_count
+	ORDER BY cast(round((p.rating+a.rating)*2,0)/4 as decimal(3,2)) desc
+	LIMIT 10;
 	
-	SELECT *
-	FROM play_store_apps
 	
+	--(48,000) x (1+(rounded rating*2) - (10,000 x price OR 25k)
+		SELECT p.name, a.name, a.primary_genre, p .genres, a.review_count, p.install_count,
+	avg_table.avg_rating1, avg_table.avg_price1, ((48000*(1+(avg_table.avg_rating1)*2))-25000) as profit
+	FROM app_store_apps as a
+	INNER JOIN play_store_apps as p
+	USING(name)
+	INNER JOIN (SELECT ROUND((a1.price + p1.price::money::numeric)/2, 2) as avg_price1, cast(round((p1.rating+a1.rating)*2,0)/4 as decimal(3,2)) as avg_rating1, a1.name
+			   FROM app_store_apps as a1
+				INNER JOIN play_store_apps as p1
+				USING(name)) as avg_table
+	USING(name)
+	WHERE cast(round((p.rating+a.rating)*2,0)/4 as decimal(3,2)) > 4
+	AND ROUND((a.price + p.price::money::numeric)/2, 2) <= 2.50
+	AND (a.review_count::numeric > 5000 or p.review_count::numeric > 5000)
+	GROUP BY p.name, a.name, p.genres, a.primary_genre, p.rating, a.rating, p.price, a.price,a.review_count, p.install_count, avg_table.avg_rating1, avg_table.avg_price1
+	ORDER BY cast(round((p.rating+a.rating)*2,0)/4 as decimal(3,2)) desc
+	limit 10
 	
+
 
 -- 	c. Develop a Top 4 list of the apps that App Trader should buy that are profitable but that also are thematically appropriate for V-DAY themed campaign.
 	SELECT p.name, a.name, a.primary_genre, p .genres, a.review_count, p.install_count, a.content_rating, p.content_rating,
